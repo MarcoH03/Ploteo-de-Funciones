@@ -1,0 +1,2 @@
+cuadrado(x)= x*x
+f(x)=x*sin(20*x)
