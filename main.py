@@ -47,7 +47,8 @@ buildin_functions = {
 if __name__ == "__main__":
     lines = [
         "/load input.txt",
-        "/gen f"
+        "/gen f",
+        "/gen h"
     ]
     for line in lines:
         try:

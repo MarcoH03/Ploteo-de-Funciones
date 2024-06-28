@@ -1,5 +1,6 @@
 import pickle
 from multiprocessing import Pool
+from multiprocessing import cpu_count
 import re
 import operator
 import math
@@ -59,7 +60,7 @@ def handle_gen(func, *args):
         params_1 = params[0]
 
         result = []
-        with Pool(5) as p:
+        with Pool(int(cpu_count())-1) as p:
             result = p.map(
                 _handle_gen,
                 [
@@ -74,6 +75,24 @@ def handle_gen(func, *args):
         # Plot some data on the Axes.
         ax.plot(np_result[:, 0], np_result[:, 1])
         plt.show()
+    else:
+        # all combinations for functions with 2++ variables
+        grids = np.meshgrid(*params)
+        param_combinations = np.vstack(list(map(np.ravel, grids))).T
+
+        with Pool(int(cpu_count())-1) as p:
+            result = p.map(_handle_gen, [(func, *param) for param in param_combinations])
+            
+        if len(args) == 2:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            xs, ys = grids
+            zs = np.array(result).flatten()
+            ax.plot3D(xs.ravel(), ys.ravel(), zs)
+            ax.set_xlabel('X Label')
+            ax.set_ylabel('Y Label')
+            ax.set_zlabel('Z Label')
+            plt.show()
 
 #segundo: Actualiza la base de datos de funciones definidas por el usuario
 def save_database():
