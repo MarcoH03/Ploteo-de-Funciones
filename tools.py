@@ -5,9 +5,10 @@ import re
 import operator
 import math
 from collections import deque
-
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 import numpy as np
+from tqdm import tqdm
 
 # Diccionario de operadores con su precedencia, asociatividad y funcion correspondiente
 OPERATORS = {
@@ -63,10 +64,10 @@ def handle_gen(func, *args):
         with Pool(int(cpu_count())-1) as p:
             result = p.map(
                 _handle_gen,
-                [
+                tqdm([
                     (func, param_1)
                     for param_1 in params_1
-                ]
+                ])
             )
         result = list(zip(params_1, result))
 
@@ -81,7 +82,7 @@ def handle_gen(func, *args):
         param_combinations = np.vstack(list(map(np.ravel, grids))).T
 
         with Pool(int(cpu_count())-1) as p:
-            result = p.map(_handle_gen, [(func, *param) for param in param_combinations])
+            result = p.map(_handle_gen, tqdm([(func, *param) for param in param_combinations]))
             
         if len(args) == 2:
             fig = plt.figure()
@@ -92,6 +93,35 @@ def handle_gen(func, *args):
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
+            plt.show()
+            
+        if len(args) == 3:
+            third_param_values = params[2]
+            frames_data = []
+
+            # Data para cada frame
+            for third_param_value in tqdm(third_param_values, desc="Preparing frames"):
+                current_combinations = [(func, *param) for param in param_combinations if param[2] == third_param_value]
+                
+                with Pool(int(cpu_count())-1) as p:
+                    result = p.map(_handle_gen, current_combinations)
+                
+                frames_data.append(result)
+            
+            # Plotting setup
+            fig, ax = plt.subplots()
+            xs, ys = np.array([param[:2] for param in param_combinations if param[2] == third_param_values[0]]).T
+            scat = ax.scatter(xs, ys, c=frames_data[0])  # Initial frame
+
+            def update(frame_number):
+                scat.set_array(frames_data[frame_number])
+                return scat,
+
+            ani = FuncAnimation(fig, update, frames=len(third_param_values), blit=True)
+            
+            # Save the animation as a video file
+            ani.save('function_animation.mp4', writer='ffmpeg', fps=5)
+
             plt.show()
 
 #segundo: Actualiza la base de datos de funciones definidas por el usuario
@@ -109,7 +139,7 @@ def load_database():
 def _handle_gen(args):
     func_name = args[0]
     args = [*args[1:]]
-    print(f"Generando grafico de {func_name} con parametros {args}")
+    #print(f"Generando grafico de {func_name} con parametros {args}")
     load_database()
 
     func_desciption = func_defs[func_name]

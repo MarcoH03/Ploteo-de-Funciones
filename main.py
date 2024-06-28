@@ -48,7 +48,9 @@ if __name__ == "__main__":
     lines = [
         "/load input.txt",
         "/gen f",
-        "/gen h"
+        "/gen h",
+        "/gen g"
+        
     ]
     for line in lines:
         try:
