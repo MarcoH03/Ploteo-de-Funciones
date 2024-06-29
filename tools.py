@@ -148,7 +148,6 @@ def handle_gen(function_name, *args):
         )
 
     np_result = np.array(result)
-
     #fig, ax = plt.subplots()
 
     # Plot some data on the Axes.
@@ -204,10 +203,10 @@ def handle_gen(function_name, *args):
             fig = plt.figure() 
             ax = fig.add_subplot(111, projection='3d')
 
-            zs = np.array(data[:, 2]).ravel()
-            xs,ys = np.meshgrid(data[:, 0], data[:, 1])
+            zs = np.array(data[:, 2])
+            xs,ys = data[:, 0], data[:, 1]
             
-            ax.plot3D(xs.ravel(), ys.ravel(), zs)
+            ax.plot3D(xs, ys, zs)
 
             # Título y etiquetas
             ax.set_title(func_def)
