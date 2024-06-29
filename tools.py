@@ -202,12 +202,16 @@ def handle_gen(function_name, *args):
             data = np_result
             fig = plt.figure() 
             ax = fig.add_subplot(111, projection='3d')
-
-            zs = np.array(data[:, 2])
-            xs,ys = data[:, 0], data[:, 1]
             
-            ax.plot3D(xs, ys, zs)
+            dimension = int(abs(_rango[1] - _rango[0])/_rango[2])
+            xs = data[:, 0].reshape((dimension,dimension))  # Adjust the shape accordingly
+            ys = data[:, 1].reshape((dimension, dimension))  # Adjust the shape accordingly
+            zs = data[:, 2].reshape((dimension, dimension))  # Adjust the shape accordingly
 
+            
+            surf = ax.plot_surface(xs, ys, zs, cmap='viridis', edgecolor='none')
+            fig.colorbar(surf, shrink=0.5, aspect=5)
+            
             # Título y etiquetas
             ax.set_title(func_def)
             ax.set_xlabel('x')
