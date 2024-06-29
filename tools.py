@@ -1,10 +1,11 @@
 from itertools import product
 import pickle
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import re
 
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D  #for 3d plotting
 import numpy as np
 
 from const import *
@@ -137,7 +138,10 @@ def handle_gen(function_name, *args):
         )
 
     result = []
-    with Pool(5) as p:
+    commands = [args[i] for i in range(len(args)) if args[i].startswith("--")]
+    args = args[:args.index(commands[0])]
+    
+    with Pool(int(cpu_count())-1) as p:
         result = p.map(
             _handle_gen,
             product([(function_name, args)], *params)
@@ -145,53 +149,70 @@ def handle_gen(function_name, *args):
 
     np_result = np.array(result)
 
-    fig, ax = plt.subplots()
+    #fig, ax = plt.subplots()
 
     # Plot some data on the Axes.
     if np_result.shape[1] == 2:
+        fig, ax = plt.subplots()
         ax.plot(np_result[:, 0], np_result[:, 1])
     elif np_result.shape[1] == 3:
-        data = np_result
+        if "--animate:True" in commands:
+            data = np_result
+            fig, ax = plt.subplots()
 
-        # Extraer valores únicos de z
-        zs = np.unique(data[:, 1])
+            # Extraer valores únicos de z
+            zs = np.unique(data[:, 1])
 
-        # Preparar la figura y los ejes
-        ax.set_xlim(np_result[:, 0].min(),
-                    np_result[:, 0].max())  # Límites para x
-        # Límites para y (considerando el desplazamiento máximo)
-        ax.set_ylim(np_result[:, 2].min(), np_result[:, 2].max())
-        line, = ax.plot([], [], 'b-', lw=3)  # Línea inicial vacía
+            # Preparar la figura y los ejes
+            ax.set_xlim(np_result[:, 0].min(),
+                        np_result[:, 0].max())  # Límites para x
+            # Límites para y (considerando el desplazamiento máximo)
+            ax.set_ylim(np_result[:, 2].min(), np_result[:, 2].max())
+            line, = ax.plot([], [], 'b-', lw=3)  # Línea inicial vacía
 
-        # Título y etiquetas
-        ax.set_title(func_def)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+            # Título y etiquetas
+            ax.set_title(func_def)
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
 
-        def init():
-            """Inicializa la animación limpiando la línea."""
-            line.set_data([], [])
-            return line,
+            def init():
+                """Inicializa la animación limpiando la línea."""
+                line.set_data([], [])
+                return line,
 
-        def update(z):
-            """Actualiza la figura para un valor de z dado."""
-            # Filtrar los datos para el z actual
-            filtered_data = data[data[:, 1] == z]
-            x = filtered_data[:, 0]
-            y = filtered_data[:, 2]
-            line.set_data(x, y)  # Establecer los nuevos datos de la línea
-            return line,
+            def update(z):
+                """Actualiza la figura para un valor de z dado."""
+                # Filtrar los datos para el z actual
+                filtered_data = data[data[:, 1] == z]
+                x = filtered_data[:, 0]
+                y = filtered_data[:, 2]
+                line.set_data(x, y)  # Establecer los nuevos datos de la línea
+                return line,
 
-        # Crear la animación
-        ani = FuncAnimation(
-            fig,
-            update,
-            frames=zs,
-            init_func=init,
-            blit=True,
-            # repeat=True,
-            interval=1000/30
-        )
+            # Crear la animación
+            ani = FuncAnimation(
+                fig,
+                update,
+                frames=zs,
+                init_func=init,
+                blit=True,
+                # repeat=True,
+                interval=1000/30
+            )
+        elif "--animate:False" in commands:
+            data = np_result
+            fig = plt.figure() 
+            ax = fig.add_subplot(111, projection='3d')
+
+            zs = np.array(data[:, 2]).ravel()
+            xs,ys = np.meshgrid(data[:, 0], data[:, 1])
+            
+            ax.plot3D(xs.ravel(), ys.ravel(), zs)
+
+            # Título y etiquetas
+            ax.set_title(func_def)
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
 
     plt.show()
 

@@ -50,7 +50,8 @@ if __name__ == "__main__":
     lines = [
         "/load input.txt",
         # "f(6)",
-        "/gen f --kind=plane",
+        "/gen f --animate:True",
+        "/gen f --animate:False",
         "/gen j",
         # 'sin(0)'
 
