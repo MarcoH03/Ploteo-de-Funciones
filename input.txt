@@ -1,2 +1,4 @@
 cuadrado(x)= x*x
 f(x)=x*sin(20*x)
+h(x,y)=x*y+2
+g(x,y,z)=x*y+z
