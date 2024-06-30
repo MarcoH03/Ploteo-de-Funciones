@@ -55,8 +55,8 @@ if __name__ == "__main__":
         "/gen v --step:1",
         "/gen j",
         "/gen r --kind:line --step:0.1",
-        "/gen f --animate:False --step:0.1",
-        "/gen f --range:x=(-6,6);y=(-6,6) --kind:scatter3d --step:1 --cores:4",
+        "/gen f --animate:False --step:1 --range:x=[-6,6];y=[-6,6]",
+        "/gen f --range:x=[-6,6);y=[-6,6] --kind:scatter3d --step:1 --cores:4",
         "/gen i --animate:False --step:0.01",   
         "/gen h --step:0.1",
         'sin(0)'

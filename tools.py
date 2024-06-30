@@ -219,8 +219,8 @@ def plot_2d_A_line(np_result, func_def):
 # region Func 3D NA
 
 def plot_3d_NA_contour(np_result, func_def, range_update):
-    dimensionFila = int(abs(range_update[1][1] - range_update[1][0])/range_update[1][2])
-    dimensionColumna = int(abs(range_update[0][1] - range_update[0][0])/range_update[0][2])
+    dimensionFila = len(np.unique(np_result[:, 1]))
+    dimensionColumna = len(np.unique(np_result[:, 0]))
     xs = np_result[:, 0].reshape((dimensionFila, dimensionColumna))
     ys = np_result[:, 1].reshape((dimensionFila, dimensionColumna))
     zs = np_result[:, 2].reshape((dimensionFila, dimensionColumna))
@@ -234,8 +234,10 @@ def plot_3d_NA_contour(np_result, func_def, range_update):
     plt.show()
     
 def plot_3d_NA_scatter3d(np_result, func_def, range_update):
-    dimensionFila = int(abs(range_update[1][1] - range_update[1][0])/range_update[1][2])
-    dimensionColumna = int(abs(range_update[0][1] - range_update[0][0])/range_update[0][2])
+    
+    dimensionFila = len(np.unique(np_result[:, 1]))
+    dimensionColumna = len(np.unique(np_result[:, 0]))
+    
     xs = np_result[:, 0].reshape((dimensionFila, dimensionColumna))
     ys = np_result[:, 1].reshape((dimensionFila, dimensionColumna))
     zs = np_result[:, 2].reshape((dimensionFila, dimensionColumna))
@@ -249,8 +251,10 @@ def plot_3d_NA_scatter3d(np_result, func_def, range_update):
     plt.show()
     
 def plot_3d_NA_surface(np_result, func_def, range_update):
-    dimensionFila = int(abs(range_update[1][1] - range_update[1][0])/range_update[1][2])
-    dimensionColumna = int(abs(range_update[0][1] - range_update[0][0])/range_update[0][2])
+    
+    dimensionFila = len(np.unique(np_result[:, 1]))
+    dimensionColumna = len(np.unique(np_result[:, 0]))
+    
     xs = np_result[:, 0].reshape((dimensionFila, dimensionColumna))
     ys = np_result[:, 1].reshape((dimensionFila, dimensionColumna))
     zs = np_result[:, 2].reshape((dimensionFila, dimensionColumna))
@@ -376,6 +380,9 @@ def handle_gen(function_name, *args):
     range_update = np.array([_rango] * len(params_definition))
     to_animate_or_not = _Default_2D_animate_or_not
     
+    #almacenar si incluir o no los extremos
+    extremosLeft = ["(", "(", "("]
+    extremosRight = [")", ")", ")"]
     
     print(f"los parametros por default son {_rango} y {_core} y {_Default_2D_animate_or_not} y {_Default_2d_NA} y {_Default_2d_A} y {_Default_3d_NA}")
     
@@ -386,7 +393,7 @@ def handle_gen(function_name, *args):
             proto_range = token.split("--range:")[1].split(" ")[0]
 
             # Expresión regular
-            regex = r"(?:(?P<param>[txyz])=\((?P<inicio>-?\d+(?:\.\d+)?),(?P<final>-?\d+(?:\.\d+)?)\);?)"
+            regex = r"(?:(?P<param>[txyz])=(?P<extremo_izq>\(|\[)(?P<inicio>-?\d+(?:\.\d+)?),(?P<final>-?\d+(?:\.\d+)?)(?P<extremo_der>\)|\]);?)"
 
             # almacenar los valores extraídos
             valores = {}
@@ -394,11 +401,17 @@ def handle_gen(function_name, *args):
             # Extracción de los valores usando la expresión regular
             for match in re.finditer(regex, proto_range):
                 valores[match.group("param")] = [float(match.group("inicio")), float(match.group("final"))]
+                
+                extremosLeft[["x", "y", "z"].index(match.group("param"))] = match.group("extremo_izq")
+                extremosRight[["x", "y", "z"].index(match.group("param"))] = match.group("extremo_der")
+                
 
             # Creación de range_update basado en los valores extraídos
             for ix,l in enumerate(params_definition):
                 if l in valores:
                     range_update[ix] = valores[l] +[range_update[ix][-1]]
+                    
+            
         
         if "--step:" in token:
             proto_step = token.split("--step:")[1].split(" ")[0]
@@ -429,10 +442,10 @@ def handle_gen(function_name, *args):
                 )
             )
         )
-        # if left is parentesiis:
-        #     params[i] = params[i][1:]
-        # if righ is corchete:
-        #     params[i] = params[i] + [range_update[i][1]]
+        if extremosLeft[i] == "(":
+            params[i] = params[i][1:]
+        if extremosRight[i] == "]":
+            params[i] = params[i] + [range_update[i][1]]
 
     result = []
     
