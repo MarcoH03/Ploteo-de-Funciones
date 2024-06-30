@@ -131,7 +131,6 @@ def handle_gen(function_name, *args):
     lista_args = list(args)
     for token in lista_args:
         if "--range:" in token:
-            print("encontre el range")
             proto_range = token.split("--range:")[1].split(" ")[0]
 
             # Expresión regular
@@ -143,12 +142,10 @@ def handle_gen(function_name, *args):
             # Extracción de los valores usando la expresión regular
             for match in re.finditer(regex, proto_range):
                 valores[match.group("param")] = [float(match.group("inicio")), float(match.group("final"))]
-                print("encontre las regex!!!!!")
 
             # Creación de range_update basado en los valores extraídos
             for ix,l in enumerate(params_definition):
                 if l in valores:
-                    print("estoy guardando el step!!!!")
                     range_update[ix] = valores[l] +[range_update[ix][-1]]
                 
         

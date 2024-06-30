@@ -1,4 +1,3 @@
 1 -  El comando --animate: recibe True o False sin espacios (--animate:True)
-2 - El comando --range: recibe x=(inicio,final);y=(inicio,final);...; step=float si en alguno ecribimo def entonce coge el de _range
-
---range:[1,2,3,4,5,6,7]
+2 - El comando --range: recibe x=(inicio,final);y=(inicio,final);... si en alguno no escribo nada entonce coge el de _range
+3 - El comando --step: recibe un float y lo usa como step. Si no esta' uso el de default
