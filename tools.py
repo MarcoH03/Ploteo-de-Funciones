@@ -11,6 +11,7 @@ import numpy as np
 from const import *
 from rpn_notation import evaluate_function, evaluate_postfix, shunting_yard
 
+plt.style.use('ggplot')
 
 def parse_function_definition(func_def):
     match = re.match(
@@ -68,7 +69,7 @@ def log_interaction(log_file, interaction):
         f.write(interaction + '\n')
 
 
-_rango = [-3, 3, 0.01]
+_rango = [-3, 3, 0.1]
 
 
 def _handle_gen(args):
@@ -126,21 +127,47 @@ def handle_gen(function_name, *args):
     func_def = function_description['func_def']
 
     params = []
-    for _ in range(len(params_definition)):
+    range_update = np.array([_rango] * len(params_definition))
+    lista_args = list(args)
+    for token in lista_args:
+        if "--range:" in token:
+            print("encontre el range")
+            proto_range = token.split("--range:")[1].split(" ")[0]
+
+            # Expresión regular
+            regex = r"(?:(?P<param>[txyz])=\((?P<inicio>-?\d+(?:\.\d+)?),(?P<final>-?\d+(?:\.\d+)?)\);?)"
+
+            # almacenar los valores extraídos
+            valores = {}
+
+            # Extracción de los valores usando la expresión regular
+            for match in re.finditer(regex, proto_range):
+                valores[match.group("param")] = [float(match.group("inicio")), float(match.group("final"))]
+                print("encontre las regex!!!!!")
+
+            # Creación de range_update basado en los valores extraídos
+            for ix,l in enumerate(params_definition):
+                if l in valores:
+                    print("estoy guardando el step!!!!")
+                    range_update[ix] = valores[l] +[range_update[ix][-1]]
+                
+        
+    for i in range(len(params_definition)):
         params.append(
             list(
                 np.arange(
-                    _rango[0],
-                    _rango[1],
-                    _rango[2]
+                    range_update[i][0],
+                    range_update[i][1],
+                    range_update[i][2]
                 )
             )
         )
 
     result = []
     commands = [args[i] for i in range(len(args)) if args[i].startswith("--")]
-    args = args[:args.index(commands[0])]
-    
+    if len(commands)!= 0:
+        args = args[:args.index(commands[0])]
+
     with Pool(int(cpu_count())-1) as p:
         result = p.map(
             _handle_gen,
@@ -204,9 +231,13 @@ def handle_gen(function_name, *args):
             ax = fig.add_subplot(111, projection='3d')
             
             dimension = int(abs(_rango[1] - _rango[0])/_rango[2])
-            xs = data[:, 0].reshape((dimension,dimension))  # Adjust the shape accordingly
-            ys = data[:, 1].reshape((dimension, dimension))  # Adjust the shape accordingly
-            zs = data[:, 2].reshape((dimension, dimension))  # Adjust the shape accordingly
+            
+            dimensionFila = int(abs(range_update[1][1] - range_update[1][0])/range_update[1][2])
+            dimensionColumna = int(abs(range_update[0][1] - range_update[0][0])/range_update[0][2])
+            
+            xs = data[:, 0].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
+            ys = data[:, 1].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
+            zs = data[:, 2].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
 
             
             surf = ax.plot_surface(xs, ys, zs, cmap='viridis', edgecolor='none')
@@ -216,6 +247,39 @@ def handle_gen(function_name, *args):
             ax.set_title(func_def)
             ax.set_xlabel('x')
             ax.set_ylabel('y')
+    elif np_result.shape[1] == 4:
+        data = np_result
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Preparar la figura y los ejes
+        ax.set_xlim(np_result[:, 0].min(),np_result[:, 0].max())  # Límites para x
+        ax.set_ylim(np_result[:, 1].min(), np_result[:, 1].max()) # Límites para y (considerando el desplazamiento máximo)
+        ax.set_zlim(np_result[:, 3].min(), np_result[:, 3].max())
+        line, = ax.plot3D([], [], [], 'b-', lw=3)  # Línea inicial vacía
+        
+        ts = np.unique(data[:, 2])
+        
+        def update(ts):
+                """Actualiza la figura para un valor de ts dado."""
+                # Filtrar los datos para el z actual
+                filtered_data = data[data[:, 2] == ts]
+                x = filtered_data[:, 0]
+                y = filtered_data[:, 1]
+                z = filtered_data[:, 3]
+                line.set_data_3d(x, y, z)  # Establecer los nuevos datos de la línea
+                return line,
+            
+        #animación
+        ani = FuncAnimation(
+            fig,
+            update,
+            frames=ts,
+            blit=True,
+            # repeat=True,
+            interval=1000/30
+        )
+        
 
     plt.show()
 
