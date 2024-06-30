@@ -294,7 +294,7 @@ def animate_3d(np_result):
 
 _Default_2d_NA = plot_2d_NA_line
 _Default_2d_A = plot_2d_A_line
-_Default_3d_NA = plot_3d_NA_contour
+_Default_3d_NA = plot_3d_NA_surface
 
 _Default_2D_animate_or_not = False
 
@@ -429,6 +429,10 @@ def handle_gen(function_name, *args):
                 )
             )
         )
+        # if left is parentesiis:
+        #     params[i] = params[i][1:]
+        # if righ is corchete:
+        #     params[i] = params[i] + [range_update[i][1]]
 
     result = []
     
@@ -485,7 +489,7 @@ def handle_gen(function_name, *args):
             elif "--kind:scatter3d" in commands:
                 plot_3d_NA_scatter3d(np_result, func_def, range_update)
                 
-            elif "--kind:surface":
+            elif "--kind:surface" in commands:
                 plot_3d_NA_surface(np_result, func_def, range_update)
             
             else:
@@ -526,6 +530,6 @@ def handle_gen(function_name, *args):
         )
         
 
-    plt.show()
+        plt.show()
 #endregion handle_gen
 # endregion handlers ...
