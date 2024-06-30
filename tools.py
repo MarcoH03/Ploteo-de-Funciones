@@ -191,74 +191,183 @@ def handle_gen(function_name, *args):
 
     # Plot some data on the Axes.
     if np_result.shape[1] == 2:
-        fig, ax = plt.subplots()
-        ax.plot(np_result[:, 0], np_result[:, 1])
-    elif np_result.shape[1] == 3:
-        if "--animate:True" in commands:
-            data = np_result
+        #region plot2D kinds
+        if "--kind:scatter" in commands:
             fig, ax = plt.subplots()
+            ax.scatter(np_result[:, 0], np_result[:, 1])
+        elif "--kind:polar" in commands:
+            fig = plt.figure()
+            ax = plt.subplot(111, polar=True)
+            ax.plot(np_result[:, 0], np_result[:, 1])
+        else:
+            fig, ax = plt.subplots()
+            ax.plot(np_result[:, 0], np_result[:, 1])
+        #endregion plot2D kinds
+             
+    elif np_result.shape[1] == 3:
+        data = np_result
+        if "--animate:True" in commands:
+            if "--kind:scatter" in commands:
+                fig, ax = plt.subplots()
+                
+                # Extraer valores únicos de z
+                zs = np.unique(data[:, 1])
+                
+                # Preparar la figura y los ejes
+                ax.set_xlim(np_result[:, 0].min(),
+                            np_result[:, 0].max())  # Límites para x
+                # Límites para y (considerando el desplazamiento máximo)
+                ax.set_ylim(np_result[:, 2].min(), np_result[:, 2].max())
+                line = ax.scatter([], [], s=10)  # Línea inicial vacía
 
-            # Extraer valores únicos de z
-            zs = np.unique(data[:, 1])
+                # Título y etiquetas
+                ax.set_title(func_def)
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
 
-            # Preparar la figura y los ejes
-            ax.set_xlim(np_result[:, 0].min(),
-                        np_result[:, 0].max())  # Límites para x
-            # Límites para y (considerando el desplazamiento máximo)
-            ax.set_ylim(np_result[:, 2].min(), np_result[:, 2].max())
-            line, = ax.plot([], [], 'b-', lw=3)  # Línea inicial vacía
+                def init():
+                    """Inicializa la animación limpiando la línea."""
+                    line.set_offsets(np.empty((0, 2)))
+                    return line,
 
-            # Título y etiquetas
-            ax.set_title(func_def)
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
+                def update(z):
+                    """Actualiza la figura para un valor de z dado."""
+                    # Filtrar los datos para el z actual
+                    filtered_data = data[data[:, 1] == z]
+                    x = filtered_data[:, 0]
+                    y = filtered_data[:, 2]
+                    line.set_offsets(np.c_[x, y])  # Establecer los nuevos datos de la línea
+                    return line,
 
-            def init():
-                """Inicializa la animación limpiando la línea."""
-                line.set_data([], [])
-                return line,
+                # Crear la animación
+                ani = FuncAnimation(
+                    fig,
+                    update,
+                    frames=zs,
+                    init_func=init,
+                    blit=True,
+                    # repeat=True,
+                    interval=1000/30
+                )
+                
+            elif "--kind:polar" in commands:
+                fig = plt.figure()
+                ax = plt.subplot(111, polar=True)
+                
+                # Extraer valores únicos de z
+                zs = np.unique(data[:, 1])
 
-            def update(z):
-                """Actualiza la figura para un valor de z dado."""
-                # Filtrar los datos para el z actual
-                filtered_data = data[data[:, 1] == z]
-                x = filtered_data[:, 0]
-                y = filtered_data[:, 2]
-                line.set_data(x, y)  # Establecer los nuevos datos de la línea
-                return line,
+                # Preparar la figura
+                line, = ax.plot([], [], 'b-', lw=3)  # Línea inicial vacía
 
-            # Crear la animación
-            ani = FuncAnimation(
-                fig,
-                update,
-                frames=zs,
-                init_func=init,
-                blit=True,
-                # repeat=True,
-                interval=1000/30
-            )
-        elif "--animate:False" in commands:
-            data = np_result
-            fig = plt.figure() 
-            ax = fig.add_subplot(111, projection='3d')
-            
-            dimension = int(abs(_rango[1] - _rango[0])/_rango[2])
-            
+                # Título y etiquetas
+                ax.set_title(func_def)
+                ax.set_xlabel('theta')
+                ax.set_ylabel('R')
+
+                def update(z):
+                    """Actualiza la figura para un valor de z dado."""
+                    # Filtrar los datos para el z actual
+                    filtered_data = data[data[:, 1] == z]
+                    x = filtered_data[:, 0]
+                    y = filtered_data[:, 2]
+                    line.set_data(x, y)  # Establecer los nuevos datos de la línea
+                    return line,
+
+                # Crear la animación
+                ani = FuncAnimation(
+                    fig,
+                    update,
+                    frames=zs,
+                    blit=True,
+                    # repeat=True,
+                    interval=1000/30
+                )
+            else: #kind:line o plot
+                fig, ax = plt.subplots()
+
+                # Extraer valores únicos de z
+                zs = np.unique(data[:, 1])
+
+                # Preparar la figura y los ejes
+                ax.set_xlim(np_result[:, 0].min(),
+                            np_result[:, 0].max())  # Límites para x
+                # Límites para y (considerando el desplazamiento máximo)
+                ax.set_ylim(np_result[:, 2].min(), np_result[:, 2].max())
+                line, = ax.plot([], [], 'b-', lw=3)  # Línea inicial vacía
+
+                # Título y etiquetas
+                ax.set_title(func_def)
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
+
+                def init():
+                    """Inicializa la animación limpiando la línea."""
+                    line.set_data([], [])
+                    return line,
+
+                def update(z):
+                    """Actualiza la figura para un valor de z dado."""
+                    # Filtrar los datos para el z actual
+                    filtered_data = data[data[:, 1] == z]
+                    x = filtered_data[:, 0]
+                    y = filtered_data[:, 2]
+                    line.set_data(x, y)  # Establecer los nuevos datos de la línea
+                    return line,
+
+                # Crear la animación
+                ani = FuncAnimation(
+                    fig,
+                    update,
+                    frames=zs,
+                    init_func=init,
+                    blit=True,
+                    # repeat=True,
+                    interval=1000/30
+                )
+        else:
             dimensionFila = int(abs(range_update[1][1] - range_update[1][0])/range_update[1][2])
             dimensionColumna = int(abs(range_update[0][1] - range_update[0][0])/range_update[0][2])
-            
+                
             xs = data[:, 0].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
             ys = data[:, 1].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
             zs = data[:, 2].reshape((dimensionFila,dimensionColumna))  # Adjust the shape accordingly
-
-            
-            surf = ax.plot_surface(xs, ys, zs, cmap='viridis', edgecolor='none')
-            fig.colorbar(surf, shrink=0.5, aspect=5)
-            
-            # Título y etiquetas
-            ax.set_title(func_def)
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
+                
+            #region plot3D still kinds
+            if "--kind:contour" in commands:
+                fig, ax = plt.subplots()
+                
+                co = ax.contourf(xs, ys, zs, cmap='viridis', edgecolor='none')
+                fig.colorbar(co, shrink=0.5, aspect=5)
+                
+                ax.set_title(func_def)
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
+                
+            elif "--kind:scatter3d" in commands:
+                fig = plt.figure() 
+                ax = fig.add_subplot(111, projection='3d')
+                
+                ax.scatter(xs, ys, zs, cmap='viridis', edgecolor='none')
+                
+                # Título y etiquetas
+                ax.set_title(func_def)
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
+            else: #kind:surface
+                fig = plt.figure() 
+                ax = fig.add_subplot(111, projection='3d')
+                
+                #dimension = int(abs(_rango[1] - _rango[0])/_rango[2])
+                
+                surf = ax.plot_surface(xs, ys, zs, cmap='viridis', edgecolor='none')
+                fig.colorbar(surf, shrink=0.5, aspect=5)
+                
+                # Título y etiquetas
+                ax.set_title(func_def)
+                ax.set_xlabel('x')
+                ax.set_ylabel('y')
+            #endregion plot3D still kinds
     elif np_result.shape[1] == 4:
         data = np_result
         fig = plt.figure()
