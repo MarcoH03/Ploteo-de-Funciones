@@ -69,7 +69,7 @@ def log_interaction(log_file, interaction):
         f.write(interaction + '\n')
 
 
-_rango = [-3, 3, 0.1]
+_rango = [-3, 3, 0.01]
 
 
 def _handle_gen(args):
@@ -147,6 +147,14 @@ def handle_gen(function_name, *args):
             for ix,l in enumerate(params_definition):
                 if l in valores:
                     range_update[ix] = valores[l] +[range_update[ix][-1]]
+        
+        if "--step:" in token:
+            proto_step = token.split("--step:")[1].split(" ")[0]
+            
+            for ix,l in enumerate(params_definition):
+                range_update[ix] = list(range_update[ix][:-1]) + [float(proto_step)]
+            
+            
                 
         
     for i in range(len(params_definition)):

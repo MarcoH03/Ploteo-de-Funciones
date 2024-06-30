@@ -49,12 +49,14 @@ def process_line(line):
 if __name__ == "__main__":
     lines = [
         "/load input.txt",
-        "/gen j",
-        "/gen f --animate:True",
-        "/gen f --animate:False --range:x=(-6,6);y=(-6,6)",
-        "/gen i --animate:False",
-        "/gen o --animate:True",   
-        "/gen h"
+        "v(x,y)=x+y",
+        "/gen v --animate:True --step:1",
+        "/gen j --step:1",
+        "/gen f --animate:True --step:1",
+        "/gen f --animate:False --range:x=(-6,6);y=(-6,6) --step:1",
+        "/gen i --animate:False --step:1",
+        "/gen o --animate:True --step:1",   
+        "/gen h --step:0.1"
         # 'sin(0)'
 
     ]
