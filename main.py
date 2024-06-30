@@ -1,5 +1,5 @@
 
-from tools import handle_define, handle_evaluate, handle_gen
+from tools import handle_define, handle_evaluate, handle_gen, handle_config
 
 import matplotlib
 
@@ -21,7 +21,8 @@ def handle_load(path, *args):
 
 build_in_functions = {
     "gen": handle_gen,
-    "load": handle_load
+    "load": handle_load,
+    "config": handle_config
 }
 
 
@@ -49,15 +50,16 @@ def process_line(line):
 if __name__ == "__main__":
     lines = [
         "/load input.txt",
-        # "v(x,y)=x+y",
-        # "/gen v --animate:True --step:1",
-        # "/gen j --kind:polar",
-        # "/gen r --kind:polar",
-        "/gen f --animate:True --step:0.1 --kind:polar",
-        "/gen f --range:x=(-6,6);y=(-6,6) --kind:scatter3d --step:1",
-        # "/gen i --animate:False --step:1",   
-        # "/gen h --cores:1"
-        # 'sin(0)'
+        "/config --kind_2d_NA:scatter --kind_3d_NA:contour --kind_2d_A:scatter --animate:True",
+        "v(x,y)=x+y",
+        "/gen v --step:1",
+        "/gen j",
+        "/gen r --kind:line --step:0.1",
+        "/gen f --animate:False --step:0.1",
+        "/gen f --range:x=(-6,6);y=(-6,6) --kind:scatter3d --step:1 --cores:4",
+        "/gen i --animate:False --step:0.01",   
+        "/gen h --step:0.1",
+        'sin(0)'
 
     ]
     for line in lines:
