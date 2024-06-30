@@ -120,6 +120,8 @@ def handle_list(func_defs):
 
 def handle_gen(function_name, *args):
     save_database()
+    
+    coreNumber = int(cpu_count())-1
 
     function_description = USERS_FUNCTIONS[function_name]
     params_definition = function_description['func_params']
@@ -127,9 +129,11 @@ def handle_gen(function_name, *args):
     func_def = function_description['func_def']
 
     params = []
+    
     range_update = np.array([_rango] * len(params_definition))
-    lista_args = list(args)
-    for token in lista_args:
+    commands = [args[i] for i in range(len(args)) if args[i].startswith("--")]
+    
+    for token in commands:
         if "--range:" in token:
             proto_range = token.split("--range:")[1].split(" ")[0]
 
@@ -153,10 +157,13 @@ def handle_gen(function_name, *args):
             
             for ix,l in enumerate(params_definition):
                 range_update[ix] = list(range_update[ix][:-1]) + [float(proto_step)]
-            
-            
-                
         
+        if "--cores:" in token:
+            proto_core = int(token.split("--cores:")[1].split(" ")[0])
+            coreNumber = proto_core if proto_core <= coreNumber else coreNumber
+            
+            
+            
     for i in range(len(params_definition)):
         params.append(
             list(
@@ -169,11 +176,11 @@ def handle_gen(function_name, *args):
         )
 
     result = []
-    commands = [args[i] for i in range(len(args)) if args[i].startswith("--")]
+    
     if len(commands)!= 0:
         args = args[:args.index(commands[0])]
 
-    with Pool(int(cpu_count())-1) as p:
+    with Pool(coreNumber) as p:
         result = p.map(
             _handle_gen,
             product([(function_name, args)], *params)
