@@ -1,5 +1,0 @@
-f(x)=x*-x-3
-a(x,y)=f(x)+f(y+f(x+2))
-g(x)=a(x,x+1)
-j(x,y)=x*x+sin(y*20)
-f(x,t) = exp(-((x - t)^2) / (2 * 1.5^2)) * sin((2*pi) * x)

@@ -1,0 +1,63 @@
+todos los parametros (True) asociados a un mismo comando (--animate:) se escriben sin espacio entre ellos
+Luego entre comando y comando se usan espacios. 
+Ej: --animate:True --range:x=[1.2,2.3];y=[2.3,4.5] --step:0.01
+
+--animate:
+    []True
+    []False
+
+--range:
+    []x=[#inicio,#final)
+
+    nota: pueden especificarse los rangos de mas variables poniendo ; entre ellas
+    nota: "[" o "]" implican que el elemento correspondiente se incluye o no en el intervalo
+
+--step:
+    []#float
+
+    nota: para funciones del tipo f(x,y,z) se recomienda un bajo step o usa demasiada memoria
+
+--core:
+    []#numero 
+
+    nota: de ser mayor que el numero de cores disponibles - 1 se obvia
+
+--kind:
+    —para funciones del tipo f(x): 
+        []plot, (default)
+        [] scatter
+        [] polar
+	—para funciones del tipo f(x,y):
+		si -—animate:True
+            [x] scatter
+            [x] polar
+            [x] line (default)
+		si —animate:False:
+            [x] surface (default)
+            [x] contour
+            [x] scatter3d
+    
+/config 
+    --range:(#inicio,#final,#step)
+
+    --core: #int
+
+    --animate:
+        []True
+        []False (default)
+
+    --kind_2d_NA:
+        []scatter
+        []polar
+        []line
+
+    --kind_2d_A:
+        []scatter
+        []polar
+        []line  
+
+    --kind_3d_NA:
+        []contour
+        []scatter3d
+        []surface
+

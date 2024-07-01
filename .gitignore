@@ -1,3 +1,6 @@
 test_sample.py
 __pycache__/tools.cpython-310.pyc
 __pycache__/tools.cpython-312.pyc
+.save_functions.txt
+__pycache__/const.cpython-312.pyc
+__pycache__/rpn_notation.cpython-312.pyc
