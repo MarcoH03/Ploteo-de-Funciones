@@ -1,6 +1,10 @@
 sin(3.14/2)
 j(x) = exp(-((x - 2)^2) / (2 * 1.5^2)) * sin((2*pi) * x)
+f(x,y) = 3*sin(0.5*x + y*pi)
+g(x,y) = 3*sin(0.5*x - y*pi) 
+h(x,y) = f(x,y) + g(x,y) 
+v(x,y) = 3*exp(-1*y/(2*3))*cos(pi*y)
 r(x) = 2
-f(x,y) = exp(-((x - y)^2) / (2 * 1.5^2))
-i(x,y) = f(x,y)+j(x+2)
-h(x,y,z) = x*y+z
+n(x,y) = exp(-((x - y)^2) / (2 * 1.5^2))
+i(x,y) = n(x,y)+j(x+2)
+a(x,y,z) = x^2 + y^2 +z

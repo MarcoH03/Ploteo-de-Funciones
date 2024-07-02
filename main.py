@@ -50,15 +50,17 @@ def process_line(line):
 if __name__ == "__main__":
     lines = [
         "/load input.txt",
-        "/config --kind_2d_NA:scatter --kind_3d_NA:contour --kind_2d_A:scatter --animate:True",
-        "v(x,y)=x+y",
-        "/gen v --step:1",
-        "/gen j",
-        "/gen r --kind:line --step:0.1",
-        "/gen f --animate:False --step:1 --range:x=[-6,6];y=[-6,6]",
-        "/gen f --range:x=[-6,6);y=[-6,6] --kind:scatter3d --step:1 --cores:4",
-        "/gen i --animate:False --step:0.01",   
-        "/gen h --step:0.1",
+        "/config --kind_2d_NA:scatter --kind_3d_NA:surface --kind_2d_A:scatter --animate:True",
+        "/gen j --kind:line",
+        "/gen f",
+        "/gen f --animate:False --kind:contour",
+        "/gen g",
+        "/gen h",
+        "/gen h --animate:False",
+        "/gen v",
+        "/gen r --range:x=[-10,10] --kind:polar",
+        "/gen i --animate:False",
+        "/gen a --step:0.1",
         'sin(0)'
 
     ]
